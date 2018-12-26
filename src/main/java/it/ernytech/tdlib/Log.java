@@ -61,7 +61,7 @@ public class Log {
      * @param fatalErrorCallback Callback that will be called when a fatal error happens. Pass null to restore default callback.
      */
     public static void setFatalErrorCallback(FatalErrorCallbackPtr fatalErrorCallback) {
-        Log.fatalErrorCallback = Objects.requireNonNullElse(fatalErrorCallback, defaultFatalErrorCallbackPtr);
+        Log.fatalErrorCallback = fatalErrorCallback != null ? fatalErrorCallback : defaultFatalErrorCallbackPtr;
     }
 
     private static void onFatalError(String errorMessage) {

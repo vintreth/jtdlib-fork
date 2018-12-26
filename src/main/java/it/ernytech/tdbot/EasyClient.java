@@ -68,7 +68,7 @@ public class EasyClient {
      * @return Request identifier. Responses to TDLib requests will have the same id as the corresponding request.
      */
     public long send(TdApi.Function function) {
-        var requestId = this.requestId.getAndIncrement();
+        long requestId = this.requestId.getAndIncrement();
         this.executors.execute(() -> {
             while (true) {
                 if (this.haveAuthorization) {
@@ -88,7 +88,7 @@ public class EasyClient {
      * @param errorCallback Interface of callback for receive incoming error response.
      */
     public void execute(TdApi.Function function, ReceiveCallback receiveCallback, ErrorCallback errorCallback) {
-        var requestId = send(function);
+        long requestId = send(function);
         this.handlers.put(requestId, new TdCallback(receiveCallback, errorCallback));
     }
 
@@ -98,8 +98,8 @@ public class EasyClient {
      * @return A response to a request.
      */
     public Response execute(TdApi.Function function) {
-        var responseAtomicReference = new AtomicReference<Response>();
-        var executedAtomicBoolean = new AtomicBoolean(false);
+        AtomicReference responseAtomicReference = new AtomicReference<Response>();
+        AtomicBoolean executedAtomicBoolean = new AtomicBoolean(false);
 
         execute(function, response -> {
             responseAtomicReference.set(response);
@@ -111,7 +111,7 @@ public class EasyClient {
 
         while (true) {
             if (executedAtomicBoolean.get()) {
-                return responseAtomicReference.get();
+                return (Response) responseAtomicReference.get();
             }
         }
     }
@@ -125,7 +125,7 @@ public class EasyClient {
         CloseCallback closeCallback = null;
 
         if (this.handlers.containsKey(0L)) {
-            var tdCallback = this.handlers.get(0L);
+            TdCallback tdCallback = this.handlers.get(0L);
 
             if (tdCallback.getErrorCallback() != null) {
                 errorCallback = tdCallback.getErrorCallback();
@@ -148,7 +148,7 @@ public class EasyClient {
         CloseCallback closeCallback = null;
 
         if (this.handlers.containsKey(0L)) {
-            var tdCallback = this.handlers.get(0L);
+            TdCallback tdCallback = this.handlers.get(0L);
 
             if (tdCallback.getReceiveCallback() != null) {
                 receiveCallback = tdCallback.getReceiveCallback();
@@ -171,7 +171,7 @@ public class EasyClient {
         ErrorCallback errorCallback = null;
 
         if (this.handlers.containsKey(0L)) {
-            var tdCallback = this.handlers.get(0L);
+            TdCallback tdCallback = this.handlers.get(0L);
 
             if (tdCallback.getReceiveCallback() != null) {
                 receiveCallback = tdCallback.getReceiveCallback();
@@ -215,13 +215,13 @@ public class EasyClient {
         if (response.getId() == 0) {
             this.handlers.get(0L).getReceiveCallback().onResult(response);
         } else {
-            var tdCallback = this.handlers.remove(response.getId());
+            TdCallback tdCallback = this.handlers.remove(response.getId());
 
             if (tdCallback == null) {
                 return;
             }
 
-            var receiveCallback = tdCallback.getReceiveCallback();
+            ReceiveCallback receiveCallback = tdCallback.getReceiveCallback();
             receiveCallback.onResult(response);
         }
     }
@@ -248,7 +248,7 @@ public class EasyClient {
         if (error.getId() == 0) {
             this.handlers.get(0L).getErrorCallback().onError(error);
         } else {
-            var tdCallback = this.handlers.remove(error.getId());
+            TdCallback tdCallback = this.handlers.remove(error.getId());
 
             if (tdCallback == null) {
                 return;
@@ -267,7 +267,7 @@ public class EasyClient {
     }
 
     public void sendRaw(TdApi.Function function) {
-        var requestId = this.requestId.getAndIncrement();
+        long requestId = this.requestId.getAndIncrement();
         this.clientActor.request(new Request(requestId, function));
     }
 
@@ -278,7 +278,7 @@ public class EasyClient {
     protected void authorizationHandler(TdApi.AuthorizationState authorizationState) {
         switch (authorizationState.getConstructor()) {
             case TdApi.AuthorizationStateWaitTdlibParameters.CONSTRUCTOR : {
-                var parameters = new TdApi.TdlibParameters();
+                TdApi.TdlibParameters parameters = new TdApi.TdlibParameters();
                 parameters.databaseDirectory = "tdlib";
                 parameters.useMessageDatabase = false;
                 parameters.useSecretChats = false;
@@ -304,7 +304,7 @@ public class EasyClient {
             }
 
             case TdApi.AuthorizationStateWaitCode.CONSTRUCTOR: {
-                var scanner = new Scanner(System.in);
+                Scanner scanner = new Scanner(System.in);
                 System.out.print("Insert your code: ");
                 sendRaw(new TdApi.CheckAuthenticationCode(scanner.nextLine(), "", ""));
                 System.out.println();
@@ -312,7 +312,7 @@ public class EasyClient {
             }
 
             case TdApi.AuthorizationStateWaitPassword.CONSTRUCTOR: {
-                var scanner = new Scanner(System.in);
+                Scanner scanner = new Scanner(System.in);
                 System.out.println("Password authorization");
                 System.out.println("Password hint: " + ((TdApi.AuthorizationStateWaitPassword) authorizationState).passwordHint);
                 System.out.print("Insert your password: ");

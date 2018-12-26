@@ -17,6 +17,7 @@
 
 package it.ernytech.tdlib;
 
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -86,7 +87,7 @@ public class ClientActor {
     private void run() {
         new Thread(() -> {
             while (!this.executionLock.isLocked()) {
-                var responseList = this.client.receive(this.timeout, 1000);
+                List<Response> responseList = this.client.receive(this.timeout, 1000);
 
                 if (responseList.size() < 1) {
                     continue;

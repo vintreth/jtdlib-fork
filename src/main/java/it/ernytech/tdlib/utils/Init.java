@@ -28,7 +28,7 @@ public class Init {
      * @throws CantLoadLibrary An exception that is thrown when the LoadLibrary class fails to load the library.
      */
     public static void start() throws Throwable {
-        var os = LoadLibrary.getOs();
+        Os os = LoadLibrary.getOs();
 
         if (os == Os.win) {
             LoadLibrary.load("libeay32");

@@ -72,16 +72,16 @@ public class Client {
             throw new IllegalStateException("ClientActor is destroyed");
         }
 
-        var responseList = new ArrayList<Response>();
-        var eventIds = new long[eventSize];
-        var events = new TdApi.Object[eventSize];
+        List responseList = new ArrayList<Response>();
+        long[] eventIds = new long[eventSize];
+        TdApi.Object[] events = new TdApi.Object[eventSize];
 
         if (this.receiveLock.isLocked()) {
             throw new IllegalThreadStateException("Thread: " + Thread.currentThread().getName() + " trying receive incoming updates but shouldn't be called simultaneously from two different threads!");
         }
 
         this.receiveLock.lock();
-        var resultSize = nativeClientReceive(this.clientId, eventIds, events, timeout);
+        int resultSize = nativeClientReceive(this.clientId, eventIds, events, timeout);
         this.receiveLock.unlock();
 
         for (int i = 0; i < resultSize; i++) {
@@ -101,7 +101,7 @@ public class Client {
             throw new IllegalStateException("ClientActor is destroyed");
         }
 
-        var responseList = receive(timeout, 1);
+        List<Response> responseList = receive(timeout, 1);
 
         if (responseList.size() < 1) {
             return null;
